@@ -8,12 +8,31 @@ const page = '<!doctype html>\n<html><head><title>x</title></head><body><p style
 
 for (const run of [extractInlineStyles, extractInlineStylesSimple]) {
   const kind = run === extractInlineStyles ? 'smart' : 'simple';
-  test(`${kind}: default inserts at top after DOCTYPE, outside head`, () => {
+  test(`${kind}: default inserts new style inside existing head`, () => {
     const result = run(page);
-    assert.match(result.html, /^<!doctype html>\n<style>/);
-    assert.ok(result.html.indexOf('</style>') < result.html.indexOf('<html>'));
+    assert.match(result.html, /^<!doctype html>\n<html><head>\n<style>/);
+    assert.ok(result.html.indexOf('</style>') < result.html.indexOf('<title>'));
+    assert.ok(result.html.indexOf('</style>') < result.html.indexOf('</head>'));
     assert.match(result.css, /color:red;/);
     assert.doesNotMatch(result.html, /style="color:red"/);
+  });
+  test(`${kind}: top creates a new style instead of reusing an existing head style`, () => {
+    const input = page.replace('<title>x</title>', '<style>.existing{margin:0}</style><title>x</title>');
+    const result = run(input, { destination: 'top' });
+    assert.equal((result.html.match(/<style>/g) || []).length, 2);
+    assert.ok(result.html.indexOf('<style>') > result.html.indexOf('<head>'));
+    assert.ok(result.html.indexOf('</style>') < result.html.indexOf('.existing{margin:0}'));
+  });
+  test(`${kind}: top with head attributes inserts at the start of head`, () => {
+    const input = '<!doctype html><HTML><HEAD data-x="y"><meta charset="utf-8"></HEAD><body><p style="color:red">X</p></body></HTML>';
+    const result = run(input);
+    assert.match(result.html, /<HEAD data-x="y">\n<style>/);
+    assert.ok(result.html.indexOf('</style>') < result.html.indexOf('<meta charset'));
+  });
+  test(`${kind}: default top falls back to after DOCTYPE when no head exists`, () => {
+    const result = run('<!doctype html>\n<p style="color:red">Hi</p>');
+    assert.match(result.html, /^<!doctype html>\n<style>/);
+    assert.doesNotMatch(result.html, /<head>/);
   });
   test(`${kind}: head inserts inside existing head`, () => {
     const result = run(page, { destination: 'head' });
@@ -61,7 +80,7 @@ for (const run of [extractInlineStyles, extractInlineStylesSimple]) {
   });
 }
 
-test('top inserts after doctype and retains CRLF', () => {
+test('top without head inserts after doctype and retains CRLF', () => {
   const result = extractInlineStyles('<!doctype html>\r\n<div style="color:red"></div>');
   assert.match(result.html, /^<!doctype html>\r\n<style>\r\n/);
 });

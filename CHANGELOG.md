@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- Corrected default `top`: create `<style>` inside an existing `<head>`; only fall back to the start of the file when `<head>` is missing.
+- Retained the difference between destinations: `top` creates a new block at the beginning of `<head>`, while `head` can reuse an eligible existing block.
+- Added creator attribution and MIT copyright for [Neup123](https://github.com/Neup123) in extension metadata, source code, LICENSE, and README.
+
 ## 0.4.0
 
 - Added the `inlineCssToStyle.destination` setting: `top` (default), `head`, `external`, `clipboard`, `clipboard-style`.

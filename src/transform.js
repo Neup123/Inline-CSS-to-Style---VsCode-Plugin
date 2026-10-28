@@ -252,9 +252,10 @@ function scanHtml(html) {
 }
 
 /**
- * Insert the extracted rules at the selected destination. Without an existing
- * head, 'head' intentionally falls back to the top of the document: it never
- * invents a head element that the caller did not request.
+ * Insert the extracted rules at the selected destination. 'top' creates a
+ * new <style> as the first element in an existing <head>; 'head' reuses an
+ * eligible <style> in <head> or appends one. Both fall back to the start of
+ * the HTML document if no explicit <head> exists, without inventing one.
  *
  * @param {string} source Original HTML
  * @param {Array<{start:number,end:number,text:string}>} edits Attribute edits
@@ -287,7 +288,13 @@ function renderOutput(source, edits, parsed, css, options = {}) {
     }
     insert = styleBlock;
     position = parsed.headClose ? parsed.headClose.start : parsed.headOpen.end;
+  } else if (destination === 'top' && parsed.headOpen) {
+    // A document with an explicit <head> must never receive <style> outside it.
+    // Unlike 'head', 'top' always creates a new block at the start of <head>.
+    insert = styleBlock;
+    position = parsed.headOpen.end;
   } else if (destination === 'top' || destination === 'head') {
+    // HTML fragments without a <head>: fall back to the start of the file.
     insert = styleBlock;
   }
   // The HTML document is changed even for clipboard modes: the clipboard

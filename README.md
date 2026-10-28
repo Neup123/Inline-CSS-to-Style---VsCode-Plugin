@@ -1,12 +1,12 @@
 # Inline CSS to Style Tag — VS Code extension
 
-Created by **[Neup123](https://github.com/Neup123)**. Copyright © 2026 Neup123. Released under the MIT License.
+Move ordinary HTML inline `style="..."` declarations into an existing `<style>` tag in the **same HTML file**. Version **0.4.1** includes context-aware selector inference and configurable CSS destinations. No remote service, telemetry, or runtime dependency.
 
-Move ordinary HTML inline `style="..."` declarations into an existing `<style>` tag in the **same HTML file**. Version **0.4.0** includes context-aware selector inference and configurable CSS destinations. No remote service, telemetry, or runtime dependency.
+Created by **[Neup123](https://github.com/Neup123)**. Copyright © 2026 Neup123. Released under the MIT License.
 
 ## Install and use
 
-Install the `.vsix` in VS Code via **Extensions → … → Install from VSIX…**. Open a file in HTML language mode and run **HTML: Extract Inline CSS to `<style>`** (`Ctrl+Shift+P`). Review the changes, and use `Ctrl+Z` to undo if necessary. **The default output is now a new `<style>` at the top of the file.**
+Install the `.vsix` in VS Code via **Extensions → … → Install from VSIX…**. Open a file in HTML language mode and run **HTML: Extract Inline CSS to `<style>`** (`Ctrl+Shift+P`). Review the changes, and use `Ctrl+Z` to undo if necessary. **By default, the new `<style>` is placed at the beginning of an existing `<head>`, or at the top of the file if there is no `<head>`.**
 
 ## Choose where to extract the CSS
 
@@ -18,7 +18,7 @@ In VS Code Settings, search for **Inline CSS to Style: Destination**, or edit `s
 
 | Value | Behavior |
 | --- | --- |
-| `top` **(default)** | Insert a **new** `<style>` near the top of the HTML file (immediately after `<!doctype>` if present), before the existing markup. |
+| `top` **(default)** | Create a **new** `<style>` as the first element inside an existing `<head>`. Without a `<head>`, insert it at the beginning of the document, just after DOCTYPE if present. |
 | `head` | Reuse an unrestricted `<style>` inside an existing `<head>`, or create one in the head. **If there is no `<head>`, fall back to `top`** rather than inventing a head. |
 | `external` | Create an adjacent, collision-free `filename.extracted.css` (or `-2`, `-3`…), and add `<link rel="stylesheet" href="...">` inside `<head>` when one exists, otherwise at the top after DOCTYPE. Existing files are never overwritten. This option requires the HTML document to be saved first. |
 | `clipboard` | Copy **plain CSS** to the clipboard. The HTML is still rewritten to remove inline attributes and use CSS selectors; paste the stylesheet into the document/project to restore the extracted visual styles. |
@@ -26,7 +26,7 @@ In VS Code Settings, search for **Inline CSS to Style: Destination**, or edit `s
 
 CSS extraction strategies (`smart` and `simple`) work with all five destinations. The extension modifies the current HTML, plus creates a new CSS file for `external`. It does not automatically save the editor buffers to disk.
 
-**HTML validity:** a `<style>` placed before `<html>` is not valid full-document HTML. Browsers often recover, but for standards-compliant full HTML documents **prefer `head` or `external`**. The default `top` follows the requested placement and never puts content before DOCTYPE, which would trigger quirks mode.
+**HTML validity:** when an explicit `<head>` exists, both `top` and `head` keep the CSS inside it. When no `<head>` exists, the fallback inserts CSS near the beginning of the file (after DOCTYPE, if present), without creating a head element. For a complete HTML document with no `<head>`, consider adding one for standard-compliant markup.
 
 ## Smart mode (default)
 
@@ -94,6 +94,6 @@ Files:
 
 **Author and copyright holder:** [Neup123](https://github.com/Neup123), © 2026.
 
-**License:** MIT. See [LICENSE](LICENSE). The copyright and permission notice must be retained in redistributed copies under the MIT License.
+**License:** MIT (see [LICENSE](LICENSE)). Attribution and copyright notice remain in redistributed copies in accordance with the MIT License.
 
 Source repository: https://github.com/Neup123/Inline-CSS-to-Style---VsCode-Plugin

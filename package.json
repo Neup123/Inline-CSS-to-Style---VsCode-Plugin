@@ -2,7 +2,7 @@
   "name": "inline-css-to-style",
   "displayName": "Inline CSS to Style Tag",
   "description": "Extract inline CSS to a top/head style tag, adjacent CSS file, or clipboard with smart selector inference.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "publisher": "Neup123",
   "private": true,
   "license": "MIT",
@@ -57,13 +57,13 @@
             "clipboard-style"
           ],
           "enumDescriptions": [
-            "Insert a new <style> element at the beginning of the document, after DOCTYPE if present.",
+            "Create a new <style> at the start of an existing <head>. If there is no <head>, insert it at the top of the file, after DOCTYPE if present.",
             "Append to a usable <style> inside <head>, or insert a new one there. If there is no <head>, use the top of the document.",
             "Create an adjacent .extracted.css file and insert a <link rel=\"stylesheet\"> inside <head> or at the top if no head exists.",
             "Copy extracted CSS declarations to the clipboard; update HTML references but do not insert CSS.",
             "Copy extracted CSS wrapped in a <style> element; update HTML references but do not insert CSS."
           ],
-          "description": "Where the extracted CSS will go. The default is the top of the HTML document."
+          "description": "Where the extracted CSS goes. Default: at the start of <head>, or the beginning of the file if <head> is absent."
         }
       }
     }

@@ -102,5 +102,5 @@ for (const destination of ['clipboard', 'clipboard-style']) {
 test('top is default if settings are absent', async () => {
   const actions = setup(undefined);
   await actions.handler();
-  assert.match(actions.edits[0][0].args[2], /^<!doctype html>\n<style>/);
+  assert.match(actions.edits[0][0].args[2], /^<!doctype html><html><head>\n<style>/);
 });
