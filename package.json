@@ -1,0 +1,86 @@
+{
+  "name": "inline-css-to-style",
+  "displayName": "Inline CSS to Style Tag",
+  "description": "Extract inline CSS to a top/head style tag, adjacent CSS file, or clipboard with smart selector inference.",
+  "version": "0.4.0",
+  "publisher": "Neup123",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Formatters",
+    "Other"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onCommand:inlineCssToStyle.extract"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "inlineCssToStyle.extract",
+        "title": "Extract Inline CSS to <style>",
+        "category": "HTML"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "inlineCssToStyle.extract",
+          "when": "editorLangId == html",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Inline CSS to Style",
+      "properties": {
+        "inlineCssToStyle.mode": {
+          "type": "string",
+          "default": "smart",
+          "enum": [
+            "smart",
+            "simple"
+          ],
+          "description": "Smart: extract shared properties to the broadest safe selector, preferring ID over class over tag for equal matches; also analyze ancestor/child relationships. Simple: always generate classes."
+        },
+        "inlineCssToStyle.destination": {
+          "type": "string",
+          "default": "top",
+          "enum": [
+            "top",
+            "head",
+            "external",
+            "clipboard",
+            "clipboard-style"
+          ],
+          "enumDescriptions": [
+            "Insert a new <style> element at the beginning of the document, after DOCTYPE if present.",
+            "Append to a usable <style> inside <head>, or insert a new one there. If there is no <head>, use the top of the document.",
+            "Create an adjacent .extracted.css file and insert a <link rel=\"stylesheet\"> inside <head> or at the top if no head exists.",
+            "Copy extracted CSS declarations to the clipboard; update HTML references but do not insert CSS.",
+            "Copy extracted CSS wrapped in a <style> element; update HTML references but do not insert CSS."
+          ],
+          "description": "Where the extracted CSS will go. The default is the top of the HTML document."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "package": "npx --yes @vscode/vsce package --allow-missing-repository --no-dependencies"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Neup123/Inline-CSS-to-Style---VsCode-Plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Neup123/Inline-CSS-to-Style---VsCode-Plugin/issues"
+  },
+  "author": {
+    "name": "Neup123",
+    "url": "https://github.com/Neup123"
+  }
+}
