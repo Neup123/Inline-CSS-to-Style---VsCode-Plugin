@@ -1,0 +1,74 @@
+name: Build and publish VSIX release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.vscodeignore'
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Test, package and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test
+        run: npm test
+
+      - name: Package VS Code extension
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          mkdir -p dist
+          npx --yes @vscode/vsce@3.9.2 package --allow-missing-repository --no-dependencies --out "dist/inline-css-to-style-${VERSION}.vsix"
+          test -s "dist/inline-css-to-style-${VERSION}.vsix"
+          sha256sum "dist/inline-css-to-style-${VERSION}.vsix" > "dist/SHA256SUMS.txt"
+
+      - name: Publish a GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          BASE_TAG="v${VERSION}"
+          TAG="${BASE_TAG}"
+          PACKAGE="dist/inline-css-to-style-${VERSION}.vsix"
+          # Keep the clean version tag for the first build. Give later builds unique tags.
+          if gh release view "$BASE_TAG" >/dev/null 2>&1; then
+            CURRENT_TARGET="$(gh release view "$BASE_TAG" --json targetCommitish --jq .targetCommitish)"
+            if [[ "$CURRENT_TARGET" != "$GITHUB_SHA" ]]; then
+              TAG="${BASE_TAG}-build.${GITHUB_RUN_NUMBER}"
+            fi
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$PACKAGE" dist/SHA256SUMS.txt --clobber
+          else
+            gh release create "$TAG" "$PACKAGE" dist/SHA256SUMS.txt \
+              --target "$GITHUB_SHA" \
+              --title "Inline CSS to Style ${TAG}" \
+              --notes "Created by Neup123. Install the attached .vsix using Extensions > ... > Install from VSIX. MIT licensed." \
+              --latest
+          fi
+
+          echo "Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"

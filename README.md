@@ -97,3 +97,15 @@ Files:
 **License:** MIT (see [LICENSE](LICENSE)). Attribution and copyright notice remain in redistributed copies in accordance with the MIT License.
 
 Source repository: https://github.com/Neup123/Inline-CSS-to-Style---VsCode-Plugin
+
+## Automatic VSIX releases
+
+GitHub Actions runs [the release workflow](.github/workflows/release.yml) whenever code, tests, the extension manifest, or the packaging configuration changes on `main`. It:
+
+1. Runs `npm test` and stops if tests fail.
+2. Creates an installable `.vsix` using `@vscode/vsce`.
+3. Publishes the VSIX and a SHA-256 checksum under [GitHub Releases](https://github.com/Neup123/Inline-CSS-to-Style---VsCode-Plugin/releases).
+
+The first successful build of version `X.Y.Z` is released as `vX.Y.Z`. Further changes without a version bump get their own release tags (`vX.Y.Z-build.N`). If a workflow run is retried, it reuses its release instead of silently changing an earlier version. For major/minor/patch version changes, update `package.json` before pushing.
+
+You can also start the workflow manually using **Actions → Build and publish VSIX release → Run workflow**. A GitHub token with `contents: write` is supplied automatically by GitHub Actions; no personal access token is required. The workflow does **not** publish to the VS Code Marketplace.

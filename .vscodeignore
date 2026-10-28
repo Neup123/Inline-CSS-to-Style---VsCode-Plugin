@@ -3,3 +3,5 @@ scripts/**
 .vscode/**
 .gitignore
 *.vsix
+.github/**
+dist/**
